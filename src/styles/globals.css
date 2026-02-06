@@ -1,0 +1,134 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Root variables */
+:root {
+  --color-navy: #0b2545;
+  --color-accent: #3B82F6;
+  --color-bg-light: #f3f4f6;
+  --transition-fast: 200ms ease;
+  --transition-normal: 300ms ease;
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 20px 25px rgba(0, 0, 0, 0.15);
+  --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+html, body, #__next {
+  height: 100%;
+}
+
+body {
+  @apply bg-white text-gray-800 leading-relaxed;
+  font-family: 'Noto Sans Bengali', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-navy rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-blue-700;
+}
+
+.container {
+  @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+/* Enhanced button styling */
+.btn-primary {
+  @apply bg-navy text-white px-6 py-3 rounded-lg font-semibold;
+  @apply shadow-md transition-all duration-300;
+  @apply hover:-translate-y-1 hover:shadow-lg hover:bg-blue-900;
+  @apply active:scale-95;
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2;
+}
+
+.btn-secondary {
+  @apply px-6 py-3 rounded-lg font-semibold text-navy border-2 border-navy;
+  @apply transition-all duration-300;
+  @apply hover:bg-navy hover:text-white hover:shadow-lg;
+  @apply active:scale-95;
+  @apply focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2;
+}
+
+.btn-ghost {
+  @apply text-navy hover:text-blue-600;
+  @apply transition-colors duration-300;
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-400 rounded px-2 py-1;
+}
+
+/* Card styling */
+.card {
+  @apply bg-white rounded-lg shadow-md;
+  @apply transition-all duration-300;
+}
+
+.card:hover {
+  @apply shadow-lg -translate-y-1;
+}
+
+/* Link styling */
+a {
+  @apply transition-colors duration-300;
+}
+
+/* Focus visible for accessibility */
+:focus-visible {
+  @apply outline-none ring-2 ring-blue-400 ring-offset-2 rounded;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Selection styling */
+::selection {
+  @apply bg-navy text-white;
+}
+
+/* Input focus styling */
+input:focus,
+textarea:focus,
+select:focus {
+  @apply outline-none ring-2 ring-blue-400 ring-offset-0;
+  border-color: var(--color-accent);
+}
+
+/* Placeholder styling */
+::placeholder {
+  @apply text-gray-400;
+}
+
+/* Responsive typography base */
+@screen sm {
+  html {
+    font-size: 14px;
+  }
+}
+
+@screen md {
+  html {
+    font-size: 16px;
+  }
+}
+
+@screen lg {
+  html {
+    font-size: 18px;
+  }
+}
