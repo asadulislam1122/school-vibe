@@ -2,8 +2,15 @@ export const SITE = {
   name: 'ভোমরাদহ উচ্চ বিদ্যালয়',
   tagline: 'গুণগত শিক্ষা, উজ্জ্বল ভবিষ্যৎ',
   address: 'গ্রাম: ভোমরাদহ, উপজেলা: উদাহরণ, জেলা: উদাহরণ',
-  phone: '+৮৮০১XXXXXXXXX',
-  email: 'info@bhomradaha.edu.bd'
+  phone: '01327822021',
+  email: 'asadulislam0288@gmail.com',
+  contactPerson: 'Md Asadullah',
+  social: {
+    discord: 'md_asadullah_59285',
+    facebook: 'https://www.facebook.com/prince.asadul.426723',
+    linkedin: 'https://www.linkedin.com/in/md-asadullah-a62863396',
+    portfolio: 'https://protfolio.asadulislam0288.workers.dev'
+  }
 }
 
 export const MENU = [
