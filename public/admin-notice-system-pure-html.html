@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Notice Management (Pure HTML/CSS/JS)</title>
+  <style>
+    /* ============================================
+       PURE HTML/CSS/JS NOTICE SYSTEM
+       Pure implementation without React framework
+       ============================================ */
+
+    /* Reset & Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans Bengali', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+
+    /* ============================================
+       NAVBAR WITH BELL ICON
+       ============================================ */
+
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      padding: 1rem 2rem;
+    }
+
+    .navbar-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #0b3b66;
+      text-decoration: none;
+    }
+
+    .navbar-brand img {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+    }
+
+    /* Bell Icon */
+    .navbar-right {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .bell-btn {
+      position: relative;
+      width: 44px;
+      height: 44px;
+      border: none;
+      background: linear-gradient(180deg, #eef6fb, #e2f0fb);
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #d6eaf8;
+      transition: all 0.3s ease;
+    }
+
+    .bell-btn:hover {
+      transform: scale(1.05);
+      background: linear-gradient(180deg, #deeef8, #d0e8fb);
+    }
+
+    .bell-btn:active {
+      transform: translateY(2px);
+    }
+
+    .bell-icon {
+      width: 24px;
+      height: 24px;
+      color: #0b3b66;
+    }
+
+    /* Badge (unread count) */
+    .badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: #ef4444;
+      color: white;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: bold;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      animation: pulse 2s infinite;
+    }
+
+    .badge.hidden {
+      display: none;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    /* Dropdown Panel */
+    .notice-panel {
+      position: absolute;
+      right: 0;
+      top: 60px;
+      background: white;
+      border: 1px solid #e6eef8;
+      border-radius: 12px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+      width: 360px;
+      max-height: 450px;
+      display: none;
+      flex-direction: column;
+      z-index: 100;
+      overflow: hidden;
+    }
+
+    .notice-panel.open {
+      display: flex;
+    }
+
+    /* Panel Header */
+    .panel-header {
+      padding: 1rem;
+      border-bottom: 1px dashed #eef4fb;
+      background: #f8fafb;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .panel-header h3 {
+      font-size: 1rem;
+      color: #0b3b66;
+      margin: 0;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.25rem;
+      cursor: pointer;
+      color: #999;
+      transition: color 0.2s;
+    }
+
+    .close-btn:hover {
+      color: #333;
+    }
+
+    /* Notices List */
+    .notices-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0.5rem;
+    }
+
+    .notice-item {
+      padding: 1rem;
+      border: 1px solid #eef6fb;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      background: #fbfdff;
+      transition: all 0.2s ease;
+    }
+
+    .notice-item:hover {
+      background: #f0f8ff;
+    }
+
+    .notice-item.unread {
+      background: linear-gradient(90deg, #e6f7ff, #f8feff);
+      border-color: #b3e5fc;
+    }
+
+    .notice-title {
+      font-weight: 600;
+      color: #0b3b66;
+      margin-bottom: 0.4rem;
+      font-size: 0.95rem;
+    }
+
+    .notice-body {
+      color: #555;
+      font-size: 0.85rem;
+      line-height: 1.4;
+      margin-bottom: 0.4rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .notice-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: #999;
+    }
+
+    .notice-badge {
+      background: #3b82f6;
+      color: white;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: bold;
+    }
+
+    /* Panel Footer */
+    .panel-footer {
+      padding: 0.75rem;
+      border-top: 1px dashed #eef4fb;
+      background: #f8fafb;
+    }
+
+    .mark-all-btn {
+      width: 100%;
+      padding: 0.6rem;
+      background: #10b981;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+
+    .mark-all-btn:hover {
+      background: #059669;
+    }
+
+    /* ============================================
+       MAIN CONTAINER & SECTIONS
+       ============================================ */
+
+    .container {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .card h2 {
+      color: #0b3b66;
+      margin-bottom: 1.5rem;
+      font-size: 1.5rem;
+    }
+
+    .card h3 {
+      color: #0b3b66;
+      margin-bottom: 1rem;
+      font-size: 1.25rem;
+    }
+
+    /* ============================================
+       FORM STYLES
+       ============================================ */
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    input[type="text"],
+    textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #0b3b66;
+      box-shadow: 0 0 0 3px rgba(11, 59, 102, 0.1);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .char-count {
+      font-size: 0.8rem;
+      color: #999;
+      margin-top: 0.3rem;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: #0b3b66;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #082850;
+    }
+
+    .btn-primary:active {
+      transform: translateY(2px);
+    }
+
+    .btn-secondary {
+      background: #6b7280;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #4b5563;
+    }
+
+    .btn-success {
+      background: #10b981;
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #059669;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+
+    .btn-outline {
+      background: white;
+      color: #0b3b66;
+      border: 1px solid #ddd;
+    }
+
+    .btn-outline:hover {
+      background: #f9fafb;
+    }
+
+    /* ============================================
+       NOTICES TABLE / LIST
+       ============================================ */
+
+    .notices-container {
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    .notice-row {
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      background: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      transition: all 0.2s ease;
+    }
+
+    .notice-row:hover {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .notice-row.unread {
+      background: #f0f8ff;
+      border-color: #b3e5fc;
+    }
+
+    .notice-content {
+      flex: 1;
+    }
+
+    .notice-content h4 {
+      color: #0b3b66;
+      margin-bottom: 0.5rem;
+    }
+
+    .notice-content p {
+      color: #666;
+      line-height: 1.5;
+      margin-bottom: 0.5rem;
+    }
+
+    .notice-time {
+      font-size: 0.8rem;
+      color: #999;
+    }
+
+    .notice-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    .notice-actions button {
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+    }
+
+    .unread-badge {
+      background: #fbbf24;
+      color: #92400e;
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      margin-top: 0.5rem;
+    }
+
+    /* ============================================
+       EDIT MODE
+       ============================================ */
+
+    .notice-row.editing {
+      background: #dbeafe;
+      border-color: #3b82f6;
+    }
+
+    .edit-inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      width: 100%;
+    }
+
+    .edit-inputs input,
+    .edit-inputs textarea {
+      font-size: 0.9rem;
+      padding: 0.5rem;
+    }
+
+    .edit-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    /* ============================================
+       STATS & HEADER
+       ============================================ */
+
+    .stats {
+      display: flex;
+      gap: 2rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #eee;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: #999;
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #0b3b66;
+    }
+
+    /* ============================================
+       EMPTY STATE
+       ============================================ */
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #999;
+    }
+
+    .empty-state p {
+      margin-bottom: 1rem;
+    }
+
+    /* ============================================
+       RESPONSIVE DESIGN
+       ============================================ */
+
+    @media (max-width: 768px) {
+      .navbar-container {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .notice-panel {
+        width: calc(100vw - 2rem);
+        max-width: 400px;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+      }
+
+      .notice-row {
+        flex-direction: column;
+      }
+
+      .notice-actions {
+        width: 100%;
+      }
+
+      .notice-actions button {
+        flex: 1;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      button {
+        width: 100%;
+      }
+
+      .card {
+        padding: 1.5rem 1rem;
+      }
+    }
+
+    /* ============================================
+       SCROLLBAR STYLING
+       ============================================ */
+
+    .notices-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .notices-list::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    .notices-list::-webkit-scrollbar-thumb {
+      background: #ccc;
+      border-radius: 3px;
+    }
+
+    .notices-list::-webkit-scrollbar-thumb:hover {
+      background: #999;
+    }
+  </style>
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <a href="#" class="navbar-brand">
+        <span>🎓</span>
+        <span>School Notice System</span>
+      </a>
+
+      <div class="navbar-right">
+        <!-- BELL ICON WITH DROPDOWN -->
+        <div style="position: relative;">
+          <button class="bell-btn" id="bellBtn" title="Notices">
+            <svg class="bell-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+            <span class="badge" id="badge">0</span>
+          </button>
+
+          <!-- NOTICE DROPDOWN PANEL -->
+          <div class="notice-panel" id="noticePanel">
+            <div class="panel-header">
+              <h3>📢 নোটিশ বোর্ড</h3>
+              <button class="close-btn" id="closePanel">✕</button>
+            </div>
+
+            <div class="notices-list" id="noticesList">
+              <!-- notices will be inserted here -->
+            </div>
+
+            <div class="panel-footer">
+              <button class="mark-all-btn" id="markAllBtn">সব পড়া হিসেবে চিহ্নিত করুন</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <div class="container">
+    <!-- ADD NOTICE CARD -->
+    <div class="card">
+      <h2>➕ নতুন নোটিশ যোগ করুন</h2>
+
+      <div class="stats">
+        <div class="stat-item">
+          <span class="stat-label">মোট নোটিশ</span>
+          <span class="stat-value" id="totalCount">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">অপঠিত</span>
+          <span class="stat-value" id="unreadCountStat">0</span>
+        </div>
+      </div>
+
+      <form id="noticeForm">
+        <div class="form-group">
+          <label for="titleInput">শিরোনাম *</label>
+          <input type="text" id="titleInput" placeholder="যেমন: পরীক্ষা সূচী" maxlength="100" required>
+          <div class="char-count"><span id="titleCount">0</span>/100</div>
+        </div>
+
+        <div class="form-group">
+          <label for="bodyInput">বিষয়বস্তু *</label>
+          <textarea id="bodyInput" placeholder="নোটিশের বিস্তারিত বিষয়বস্তু লিখুন..." maxlength="500" required></textarea>
+          <div class="char-count"><span id="bodyCount">0</span>/500</div>
+        </div>
+
+        <div class="button-group">
+          <button type="submit" class="btn-primary">নোটিশ যোগ করুন</button>
+          <button type="button" class="btn-danger" id="clearAllBtn">
+            সব মুছুন
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- NOTICES LIST CARD -->
+    <div class="card">
+      <h3>📋 সমস্ত নোটিশ</h3>
+
+      <div id="noticesList2" class="notices-container">
+        <!-- notices will be inserted here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT -->
+  <script>
+    // ============================================
+    // NOTICE SYSTEM - PURE JAVASCRIPT
+    // localStorage-based, no framework needed
+    // ============================================
+
+    const STORAGE_KEY = 'school_notices_v2'
+
+    // DOM Elements
+    const bellBtn = document.getElementById('bellBtn')
+    const badge = document.getElementById('badge')
+    const noticePanel = document.getElementById('noticePanel')
+    const noticesList = document.getElementById('noticesList')
+    const noticesList2 = document.getElementById('noticesList2')
+    const closePanel = document.getElementById('closePanel')
+    const markAllBtn = document.getElementById('markAllBtn')
+    const totalCount = document.getElementById('totalCount')
+    const unreadCountStat = document.getElementById('unreadCountStat')
+
+    const titleInput = document.getElementById('titleInput')
+    const bodyInput = document.getElementById('bodyInput')
+    const titleCount = document.getElementById('titleCount')
+    const bodyCount = document.getElementById('bodyCount')
+    const noticeForm = document.getElementById('noticeForm')
+    const clearAllBtn = document.getElementById('clearAllBtn')
+
+    // ============================================
+    // UTILITY FUNCTIONS
+    // ============================================
+
+    /**
+     * Load notices from localStorage
+     * @returns {Array} notices array
+     */
+    function loadNotices() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY)
+        if (!stored) {
+          // Create default notice
+          const defaultNotice = {
+            id: Date.now(),
+            title: 'স্কুল খোলা সম্পর্কিত বিজ্ঞপ্তি',
+            body: 'আগামী সোমবার থেকে নিয়মিত ক্লাস শুরু হবে।',
+            timestamp: Date.now(),
+            unread: true
+          }
+          localStorage.setItem(STORAGE_KEY, JSON.stringify([defaultNotice]))
+          return [defaultNotice]
+        }
+        return JSON.parse(stored)
+      } catch (e) {
+        console.error('Storage error:', e)
+        return []
+      }
+    }
+
+    /**
+     * Save notices to localStorage
+     */
+    function saveNotices(notices) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(notices))
+      } catch (e) {
+        console.error('Save error:', e)
+      }
+    }
+
+    /**
+     * Get notices sorted newest first
+     */
+    function getSortedNotices() {
+      const notices = loadNotices()
+      return notices.sort((a, b) => b.timestamp - a.timestamp)
+    }
+
+    /**
+     * Format time in Bengali
+     */
+    function formatTime(timestamp) {
+      const now = Date.now()
+      const diff = now - timestamp
+
+      if (diff < 60000) return 'এখনই'
+      if (diff < 3600000) return Math.floor(diff / 60000) + ' মিনিট আগে'
+      if (diff < 86400000) return Math.floor(diff / 3600000) + ' ঘণ্টা আগে'
+      if (diff < 604800000) return Math.floor(diff / 86400000) + ' দিন আগে'
+
+      return new Date(timestamp).toLocaleDateString('bn-BD')
+    }
+
+    /**
+     * Escape HTML to prevent XSS
+     */
+    function escapeHtml(text) {
+      const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }
+      return text.replace(/[&<>"']/g, m => map[m])
+    }
+
+    /**
+     * Update badge and stats
+     */
+    function updateUI() {
+      const notices = loadNotices()
+      const unread = notices.filter(n => n.unread).length
+
+      // Update badge
+      badge.textContent = unread
+      badge.classList.toggle('hidden', unread === 0)
+
+      // Update stats
+      totalCount.textContent = notices.length
+      unreadCountStat.textContent = unread
+
+      // Re-render both lists
+      renderPanel()
+      renderMainList()
+    }
+
+    /**
+     * Render notice panel dropdown
+     */
+    function renderPanel() {
+      const notices = getSortedNotices()
+      noticesList.innerHTML = ''
+
+      if (notices.length === 0) {
+        noticesList.innerHTML = '<div style="padding: 2rem; text-align: center; color: #999;">কোনো নোটিশ নেই</div>'
+        return
+      }
+
+      notices.forEach(notice => {
+        const item = document.createElement('div')
+        item.className = `notice-item ${notice.unread ? 'unread' : ''}`
+        item.innerHTML = `
+          <div class="notice-title">${escapeHtml(notice.title)}</div>
+          <div class="notice-body">${escapeHtml(notice.body)}</div>
+          <div class="notice-meta">
+            <span>${formatTime(notice.timestamp)}</span>
+            ${notice.unread ? '<span class="notice-badge">নতুন</span>' : ''}
+          </div>
+          <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+            ${notice.unread ? `<button class="btn-success" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="markAsRead(${notice.id})">পড়া হিসেবে</button>` : ''}
+            <button class="btn-danger" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="deleteNotice(${notice.id})">মুছুন</button>
+          </div>
+        `
+        noticesList.appendChild(item)
+      })
+    }
+
+    /**
+     * Render main notices list
+     */
+    function renderMainList() {
+      const notices = getSortedNotices()
+      noticesList2.innerHTML = ''
+
+      if (notices.length === 0) {
+        noticesList2.innerHTML = '<div class="empty-state"><p>এখনও কোনো নোটিশ যোগ করা হয়নি।</p></div>'
+        return
+      }
+
+      notices.forEach(notice => {
+        const row = document.createElement('div')
+        row.className = `notice-row ${notice.unread ? 'unread' : ''}`
+        row.innerHTML = `
+          <div class="notice-content">
+            <h4>${escapeHtml(notice.title)}</h4>
+            <p>${escapeHtml(notice.body)}</p>
+            <span class="notice-time">${formatTime(notice.timestamp)}</span>
+            ${notice.unread ? '<div class="unread-badge">অপঠিত</div>' : ''}
+          </div>
+          <div class="notice-actions">
+            ${notice.unread ? `<button class="btn-success btn-sm" onclick="markAsRead(${notice.id})">পড়া হিসেবে</button>` : ''}
+            <button class="btn-primary btn-sm" onclick="editNotice(${notice.id})">সম্পাদনা</button>
+            <button class="btn-danger btn-sm" onclick="deleteNotice(${notice.id})">মুছুন</button>
+          </div>
+        `
+        noticesList2.appendChild(row)
+      })
+    }
+
+    // ============================================
+    // NOTICE OPERATIONS
+    // ============================================
+
+    function addNotice(title, body) {
+      if (!title.trim() || !body.trim()) {
+        alert('শিরোনাম এবং বিষয়বস্তু প্রয়োজন')
+        return
+      }
+
+      const notices = loadNotices()
+      notices.push({
+        id: Date.now() + Math.random(),
+        title: title.trim(),
+        body: body.trim(),
+        timestamp: Date.now(),
+        unread: true
+      })
+
+      saveNotices(notices)
+      updateUI()
+      titleInput.value = ''
+      bodyInput.value = ''
+      titleCount.textContent = '0'
+      bodyCount.textContent = '0'
+    }
+
+    function deleteNotice(id) {
+      if (!confirm('এই নোটিশ মুছে ফেলবেন?')) return
+
+      let notices = loadNotices()
+      notices = notices.filter(n => n.id !== id)
+      saveNotices(notices)
+      updateUI()
+    }
+
+    function markAsRead(id) {
+      const notices = loadNotices()
+      const notice = notices.find(n => n.id === id)
+      if (notice) notice.unread = false
+      saveNotices(notices)
+      updateUI()
+    }
+
+    function markAllAsRead() {
+      const notices = loadNotices()
+      notices.forEach(n => n.unread = false)
+      saveNotices(notices)
+      updateUI()
+    }
+
+    function clearAllNotices() {
+      if (!confirm('সমস্ত নোটিশ মুছে দেওয়া হবে। নিশ্চিত?')) return
+
+      localStorage.removeItem(STORAGE_KEY)
+      updateUI()
+    }
+
+    function editNotice(id) {
+      const notices = loadNotices()
+      const notice = notices.find(n => n.id === id)
+      if (!notice) return
+
+      const newTitle = prompt('নতুন শিরোনাম:', notice.title)
+      if (newTitle === null) return
+
+      const newBody = prompt('নতুন বিষয়বস্তু:', notice.body)
+      if (newBody === null) return
+
+      notice.title = newTitle.trim()
+      notice.body = newBody.trim()
+      saveNotices(notices)
+      updateUI()
+    }
+
+    // ============================================
+    // EVENT LISTENERS
+    // ============================================
+
+    // Bell button
+    bellBtn.addEventListener('click', () => {
+      noticePanel.classList.toggle('open')
+      // Mark all as read when opening
+      if (noticePanel.classList.contains('open')) {
+        markAllAsRead()
+      }
+    })
+
+    // Close panel
+    closePanel.addEventListener('click', () => {
+      noticePanel.classList.remove('open')
+    })
+
+    // Click outside to close
+    document.addEventListener('click', (e) => {
+      if (!noticePanel.contains(e.target) && !bellBtn.contains(e.target)) {
+        noticePanel.classList.remove('open')
+      }
+    })
+
+    // Escape key to close
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') noticePanel.classList.remove('open')
+    })
+
+    // Form submission
+    noticeForm.addEventListener('submit', (e) => {
+      e.preventDefault()
+      addNotice(titleInput.value, bodyInput.value)
+    })
+
+    // Clear all button
+    clearAllBtn.addEventListener('click', clearAllNotices)
+
+    // Mark all button
+    markAllBtn.addEventListener('click', markAllAsRead)
+
+    // Character counters
+    titleInput.addEventListener('input', () => {
+      titleCount.textContent = titleInput.value.length
+    })
+
+    bodyInput.addEventListener('input', () => {
+      bodyCount.textContent = bodyInput.value.length
+    })
+
+    // ============================================
+    // INITIALIZATION
+    // ============================================
+
+    updateUI()
+  </script>
+</body>
+</html>

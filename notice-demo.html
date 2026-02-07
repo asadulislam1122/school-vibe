@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>School Notices — Demo</title>
+  <style>
+    /* Basic reset */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans Bengali', sans-serif; background:#f7fafc; color:#0f172a; line-height:1.4; }
+
+    /* Navbar */
+    .navbar { display:flex; align-items:center; justify-content:space-between; padding:12px 20px; background:#ffffff; border-bottom:1px solid #e6eef8; position:sticky; top:0; z-index:20; }
+    .brand { font-weight:700; color:#0b3b66; display:flex; gap:12px; align-items:center; }
+    .brand img { width:36px; height:36px; border-radius:6px; }
+
+    /* Right area: notification bell + placeholder user */
+    .nav-right { display:flex; gap:16px; align-items:center; position:relative; }
+
+    /* Bell + badge */
+    .bell {
+      width:44px; height:44px; display:inline-grid; place-items:center;
+      background:linear-gradient(180deg,#eef6fb,#e2f0fb); border-radius:10px;
+      cursor:pointer; position:relative; border:1px solid #d6eaf8;
+    }
+    .bell:active { transform:translateY(1px); }
+    .badge {
+      position:absolute; top:6px; right:6px;
+      background:#ef4444; color:white; font-size:12px; min-width:20px; height:20px;
+      padding:0 6px; border-radius:999px; display:inline-flex; align-items:center; justify-content:center;
+      box-shadow:0 2px 6px rgba(0,0,0,0.12);
+    }
+
+    /* Notice dropdown */
+    .notice-panel {
+      position:absolute; right:0; top:60px; width:360px; max-height:420px; overflow:auto;
+      background:white; border:1px solid #e6eef8; border-radius:8px; box-shadow:0 12px 30px rgba(2,6,23,0.08);
+      display:none; padding:12px; gap:8px;
+    }
+    .notice-panel.open { display:flex; flex-direction:column; }
+
+    .notice-header { display:flex; align-items:center; justify-content:space-between; padding-bottom:8px; border-bottom:1px dashed #eef4fb; }
+    .notice-header h4 { font-size:16px; color:#0b3b66; }
+    .btn { cursor:pointer; background:#0b69a3; color:white; border:none; padding:8px 10px; border-radius:6px; font-size:14px; }
+    .btn.ghost { background:transparent; color:#0b69a3; border:1px solid #dceefb; padding:6px 8px; }
+
+    .notices { display:flex; flex-direction:column; gap:8px; padding-top:8px; }
+    .notice { background:#fbfdff; border:1px solid #eef6fb; padding:10px; border-radius:8px; font-size:14px; color:#0b2538; }
+    .notice.unread { background:linear-gradient(90deg,#e6f7ff, #f8feff); border-color:#cfeeff; }
+    .notice .meta { font-size:12px; color:#145374; margin-bottom:6px; display:flex; justify-content:space-between; gap:8px; }
+    .notice .body { color:#0b2b3a; }
+
+    /* Page content and demo form */
+    .container { max-width:1000px; margin:28px auto; padding:0 20px; }
+    .card { background:white; padding:16px; border-radius:10px; border:1px solid #eef4fb; box-shadow:0 6px 18px rgba(2,6,23,0.03); }
+    form.row { display:grid; grid-template-columns:1fr auto; gap:12px; align-items:start; }
+    form input, form textarea { width:100%; padding:10px; border:1px solid #dbeaf7; border-radius:8px; font-size:14px; }
+    form textarea { resize:vertical; min-height:90px; }
+    .muted { color:#315b72; font-size:13px; }
+
+    /* Responsive */
+    @media (max-width:560px){
+      .notice-panel { width:92vw; right:4vw; left:4vw; top:68px; max-height:60vh; }
+      form.row { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <header class="navbar" role="banner">
+    <div class="brand">
+      <img src="https://img.icons8.com/emoji/48/school-emoji.png" alt="school" />
+      <div>
+        <div style="font-size:18px">ভোমরাদহ উচ্চ বিদ্যালয়</div>
+        <div class="muted" style="font-size:12px">একটি দৃষ্টান্তমূলক শিক্ষা প্রতিষ্ঠান</div>
+      </div>
+    </div>
+
+    <div class="nav-right">
+      <!-- Notification bell with badge -->
+      <div class="bell" id="bellBtn" aria-haspopup="true" aria-expanded="false" aria-label="Notices">
+        <!-- inline SVG bell icon -->
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+          <path d="M12 22c1.1 0 2-.9 2-2H10c0 1.1.9 2 2 2z" fill="#0b3b66"/>
+          <path d="M18 16v-5c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 10-3 0v.68C7.64 5.36 6 7.92 6 11v5l-1.7 1.7A1 1 0 005 20h14a1 1 0 00.7-1.7L18 16z" fill="#0b3b66"/>
+        </svg>
+        <span class="badge" id="badge" aria-hidden>0</span>
+      </div>
+
+      <!-- Notice dropdown panel -->
+      <div class="notice-panel" id="noticePanel" role="dialog" aria-label="Notices panel">
+        <div class="notice-header">
+          <h4>নোটিশ বোর্ড</h4>
+          <div style="display:flex; gap:8px; align-items:center">
+            <button class="btn ghost" id="clearBtn" title="Mark all read">Mark read</button>
+            <button class="btn" id="closePanel">Close</button>
+          </div>
+        </div>
+
+        <div class="notices" id="noticesList" aria-live="polite">
+          <!-- notices will be injected here -->
+        </div>
+
+        <div style="padding-top:8px; border-top:1px dashed #eef4fb; display:flex; justify-content:center; gap:8px; margin-top:8px;">
+          <small class="muted">মোট নোটিশ: <span id="totalCount">0</span></small>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main demo area: Notice form + board -->
+  <main class="container">
+    <div class="card" style="margin-bottom:16px">
+      <h3 style="margin-bottom:8px">নতুন নোটিশ যোগ করুন (ডেমো)</h3>
+      <form id="noticeForm" class="row" onsubmit="return false;">
+        <div style="display:flex; flex-direction:column; gap:8px">
+          <input id="title" placeholder="শিরোনাম (উদাহরণ: পরীক্ষা বিজ্ঞপ্তি)" required />
+          <textarea id="body" placeholder="বিস্তারিত লেখুন..." required></textarea>
+          <div style="font-size:13px;color:#315b72">নোটিশ যোগ করলে ব্যাজ কاؤن্ট স্বয়ংক্রিয়ভাবে আপডেট হবে।</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button id="addBtn" class="btn" style="min-width:120px;padding:12px">Add Notice</button>
+          <button id="markReadBtn" class="btn ghost" style="min-width:120px">Mark all read</button>
+          <button id="clearAllBtn" class="btn ghost" style="min-width:120px">Clear all</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-bottom:12px">Notice Board (full list)</h3>
+      <div id="boardAll" style="display:flex;flex-direction:column;gap:8px">
+        <!-- full list will be injected here -->
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Pure JS notice board demo
+    // Uses localStorage key to persist notices between page reloads.
+    const STORE_KEY = 'school_notices_v1'
+
+    // Elements
+    const badgeEl = document.getElementById('badge')
+    const bellBtn = document.getElementById('bellBtn')
+    const noticePanel = document.getElementById('noticePanel')
+    const noticesList = document.getElementById('noticesList')
+    const boardAll = document.getElementById('boardAll')
+    const totalCountEl = document.getElementById('totalCount')
+
+    // Form elements
+    const titleInput = document.getElementById('title')
+    const bodyInput = document.getElementById('body')
+    const addBtn = document.getElementById('addBtn')
+    const markReadBtn = document.getElementById('markReadBtn')
+    const clearAllBtn = document.getElementById('clearAllBtn')
+    const clearBtn = document.getElementById('clearBtn')
+    const closePanelBtn = document.getElementById('closePanel')
+
+    // Utility: load & save
+    function loadNotices(){
+      try {
+        const raw = localStorage.getItem(STORE_KEY)
+        if(!raw) {
+          // seed with a sample notice
+          const seed = [{ id: Date.now(), title: 'স্কুল খোলা সম্পর্কিত বিজ্ঞপ্তি', body: 'আগামী সোমবার থেকে নিয়মিত ক্লাস শুরু হবে।', ts: Date.now(), unread: true }]
+          localStorage.setItem(STORE_KEY, JSON.stringify(seed))
+          return seed
+        }
+        return JSON.parse(raw)
+      } catch(e) {
+        console.error('Failed to load notices', e)
+        return []
+      }
+    }
+    function saveNotices(arr){ localStorage.setItem(STORE_KEY, JSON.stringify(arr)) }
+
+    // Render helpers
+    function renderBadge(notices){
+      const unread = notices.filter(n=>n.unread).length
+      badgeEl.textContent = unread || 0
+      badgeEl.style.display = unread ? 'inline-flex' : 'none'
+      totalCountEl.textContent = notices.length
+    }
+
+    function renderNoticesPanel(notices){
+      noticesList.innerHTML = ''
+      if(notices.length === 0){
+        noticesList.innerHTML = '<div class="muted" style="padding:10px">No notices</div>'
+        return
+      }
+      // show newest first
+      [...notices].reverse().forEach(n => {
+        const div = document.createElement('div')
+        div.className = 'notice' + (n.unread ? ' unread' : '')
+        div.innerHTML = `
+          <div class="meta">
+            <div>${escapeHtml(n.title)}</div>
+            <div style="opacity:0.8;font-size:12px">${new Date(n.ts).toLocaleString()}</div>
+          </div>
+          <div class="body">${escapeHtml(n.body)}</div>
+        `
+        noticesList.appendChild(div)
+      })
+    }
+
+    function renderBoardAll(notices){
+      boardAll.innerHTML = ''
+      if(notices.length === 0){
+        boardAll.innerHTML = '<div class="muted" style="padding:10px">No notices</div>'
+        return
+      }
+      [...notices].reverse().forEach(n => {
+        const div = document.createElement('div')
+        div.className = 'notice' + (n.unread ? ' unread' : '')
+        div.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <strong>${escapeHtml(n.title)}</strong>
+            <small style="color:#145374">${new Date(n.ts).toLocaleString()}</small>
+          </div>
+          <div style="margin-top:6px">${escapeHtml(n.body)}</div>
+        `
+        boardAll.appendChild(div)
+      })
+    }
+
+    // Create new notice
+    function addNotice(title, body){
+      const all = loadNotices()
+      const item = { id: Date.now() + Math.random(), title: title.trim(), body: body.trim(), ts: Date.now(), unread: true }
+      all.push(item)
+      saveNotices(all)
+      // update UI
+      renderBadge(all)
+      renderNoticesPanel(all)
+      renderBoardAll(all)
+    }
+
+    // Mark all read (called when user views the panel or clicks mark read)
+    function markAllRead(){
+      const all = loadNotices().map(n => ({ ...n, unread:false }))
+      saveNotices(all)
+      renderBadge(all)
+      renderNoticesPanel(all)
+      renderBoardAll(all)
+    }
+
+    // Clear all notices (demo)
+    function clearAll(){
+      localStorage.removeItem(STORE_KEY)
+      const arr = []
+      renderBadge(arr)
+      renderNoticesPanel(arr)
+      renderBoardAll(arr)
+    }
+
+    // Simple HTML escape (avoid XSS in demo)
+    function escapeHtml(s){
+      return String(s).replace(/[&<>\

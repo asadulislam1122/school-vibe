@@ -6,6 +6,7 @@ import { useAuth } from '../hooks/useContexts'
 import { useTheme } from '../context/ThemeContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import gsap from 'gsap'
+import NoticePanel from './NoticePanel'
 
 export default function Navbar() {
   const [open, setOpen] = useState(false)
@@ -234,10 +235,23 @@ export default function Navbar() {
           >
             {theme === 'light' ? '🌙' : '☀️'}
           </motion.button>
+
+          {/* Notice Panel Desktop */}
+          <motion.div
+            custom={MENU.length + 3}
+            initial="hidden"
+            animate="visible"
+            variants={menuItemVariants}
+          >
+            <NoticePanel />
+          </motion.div>
         </motion.nav>
 
         {/* Mobile Controls */}
         <motion.div className="md:hidden flex items-center gap-4">
+          {/* Notice Panel Mobile */}
+          <NoticePanel />
+
           {/* Theme Toggle Mobile */}
           <motion.button
             onClick={handleThemeToggle}
