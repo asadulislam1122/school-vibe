@@ -1,7 +1,10 @@
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { SITE } from '../data/content'
+import { useTheme } from '../context/ThemeContext'
 
 export default function Hero(){
+  const { theme } = useTheme()
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -24,8 +27,18 @@ export default function Hero(){
         backgroundPosition: 'center'
       }}
     >
-      {/* No color overlay — clear image as requested */}
-      <div className="absolute inset-0 bg-transparent"></div>
+      {/* Theme-aware overlay: animates between light and dark */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={theme}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: theme === 'dark' ? 0.55 : 0.18 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5 }}
+          className="absolute inset-0"
+          style={{ background: theme === 'dark' ? 'rgba(6,7,23,0.8)' : 'rgba(255,255,255,0.18)', backdropFilter: 'saturate(120%) blur(2px)' }}
+        />
+      </AnimatePresence>
 
       {/* Decorative shapes - optional */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600 rounded-full opacity-5 blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
@@ -40,10 +53,8 @@ export default function Hero(){
         >
           <motion.h1 
             variants={itemVariants}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight"
-            style={{
-              textShadow: '4px 4px 12px rgba(2,6,23,0.7)'
-            }}
+            className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight ${theme === 'dark' ? 'text-blue-200' : 'text-white'}`}
+            style={{ textShadow: theme === 'dark' ? '3px 3px 10px rgba(2,6,23,0.85)' : '4px 4px 12px rgba(2,6,23,0.55)' }}
           >
             {SITE.name}
           </motion.h1>
@@ -66,8 +77,8 @@ export default function Hero(){
               href="/about" 
               className="inline-flex items-center gap-2 px-6 py-3 rounded-md text-white shadow-lg transform transition-all hover:scale-105"
               style={{
-                background: 'linear-gradient(90deg,#06b6d4 0%,#7c3aed 100%)',
-                boxShadow: '0 10px 25px rgba(124,58,237,0.18)'
+                background: theme === 'dark' ? 'linear-gradient(90deg,#0ea5e9 0%,#7c3aed 100%)' : 'linear-gradient(90deg,#06b6d4 0%,#7c3aed 100%)',
+                boxShadow: theme === 'dark' ? '0 10px 30px rgba(124,58,237,0.28)' : '0 10px 25px rgba(124,58,237,0.18)'
               }}
             >
               ভর্তি তথ্য
@@ -77,8 +88,8 @@ export default function Hero(){
               href="/contact" 
               className="inline-flex items-center gap-2 px-6 py-3 rounded-md text-white shadow-md transform transition-all hover:scale-105 border border-white/20"
               style={{
-                background: 'linear-gradient(90deg,#fb7185 0%,#f59e0b 100%)',
-                boxShadow: '0 8px 20px rgba(245,158,11,0.12)'
+                background: theme === 'dark' ? 'linear-gradient(90deg,#ef4444 0%,#f97316 100%)' : 'linear-gradient(90deg,#fb7185 0%,#f59e0b 100%)',
+                boxShadow: theme === 'dark' ? '0 8px 24px rgba(249,115,22,0.18)' : '0 8px 20px rgba(245,158,11,0.12)'
               }}
             >
               যোগাযোগ করুন
