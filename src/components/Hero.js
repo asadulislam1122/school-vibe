@@ -53,7 +53,7 @@ export default function Hero(){
         >
           <motion.h1 
             variants={itemVariants}
-            className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight ${theme === 'dark' ? 'text-blue-200' : 'text-white'}`}
+            className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight ${theme === 'dark' ? 'text-pink-600' : 'text-pink-600'}`}
             style={{ textShadow: theme === 'dark' ? '3px 3px 10px rgba(2,6,23,0.85)' : '4px 4px 12px rgba(2,6,23,0.55)' }}
           >
             {SITE.name}
